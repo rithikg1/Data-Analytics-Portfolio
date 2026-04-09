@@ -25,7 +25,7 @@ I'm a data analyst with hands-on experience in statistical modeling, machine lea
 | **Languages** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![R](https://img.shields.io/badge/R-276DC3?style=flat-square&logo=r&logoColor=white) ![SQL](https://img.shields.io/badge/SQL-4479A1?style=flat-square&logo=postgresql&logoColor=white) |
 | **Data Science & ML** | scikit-learn, statsmodels, Random Forest, KNN, Linear & Logistic Regression, Cross-Validation |
 | **Data Wrangling** | pandas, NumPy, dplyr, tidyverse |
-| **Visualization** | ![Tableau](https://img.shields.io/badge/Tableau-E97627?style=flat-square&logo=tableau&logoColor=white) Matplotlib, Seaborn, ggplot2 |
+| **Visualization** | ![Tableau](https://img.shields.io/badge/Tableau-E97627?style=flat-square&logo=tableau&logoColor=white) Power BI, IBM Cognos Analytics, Matplotlib, Seaborn, ggplot2 |
 | **Other** | Web Scraping, Jupyter Notebooks, RMarkdown |
 
 ---
