@@ -14,7 +14,7 @@
 
 ## About Me
 
-I'm a data analyst with hands-on experience in statistical modeling, machine learning, data visualization, and business intelligence. My work spans health analytics, environmental science, global sales strategy, and technology trend analysis. I'm proficient in Python, R, SQL, PowerBI, and Tableau, and I enjoy tackling real-world problems where data can drive better decisions.
+I'm a data analyst with hands-on experience in statistical modeling, machine learning, data visualization, and business intelligence. My work spans health analytics, environmental science, global sales strategy, and technology trend analysis. I'm proficient in Python, R, SQL, PowerBI, and Tableau and I enjoy tackling real-world problems where data can drive better decisions.
 
 ---
 
@@ -26,7 +26,7 @@ I'm a data analyst with hands-on experience in statistical modeling, machine lea
 | **Data Science & ML** | scikit-learn, statsmodels, Random Forest, KNN, Linear & Logistic Regression, Cross-Validation |
 | **Data Wrangling** | pandas, NumPy, dplyr, tidyverse |
 | **Visualization** | ![Tableau](https://img.shields.io/badge/Tableau-E97627?style=flat-square&logo=tableau&logoColor=white) Matplotlib, Seaborn, ggplot2 |
-| **Other** | Web Scraping, Git, Jupyter Notebooks, RMarkdown |
+| **Other** | Web Scraping, Jupyter Notebooks, RMarkdown |
 
 ---
 
