@@ -1,0 +1,184 @@
+---
+title: "Sleep Health Factors Analysis"
+author: "Rithik Ganesan"
+date: "2025-02-16"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(readr)
+library(tidyverse)
+library(ggplot2)
+library(randomForest)
+```
+
+## Background and Problem Definition
+
+Sleep is essential for maintaining good health and well-being. It plays a vital role in one's physical, mental, and emotional health. Even so, many people (including myself) struggle falling asleep, staying asleep, and getting good quality sleep. In an attempt to combat this worldwide problem, I will be analyzing what factors are the most beneficial and detrimental for getting an adequate amount of high quality sleep. There are many variables used in the analysis. These variables are gender of the person, age of the person, hours of sleep, quality of sleep (1-5), level of stress (1-5), blood pressure, heart rate, daily steps taken, amount of physical activity in minutes, height, weight, and average screen time in minutes. Other variables include whether or not the individual wakes up over night, consumes caffeine, consumes alcohol, smokes, uses a smart device before bed, and uses a blue light filter. These variables are all listed as "Y" for yes and "N" for no. Hopefully the conclusion of this analysis can inform myself and others what they can do to get better sleep. This data set is from Kaggle. 
+
+Link to Dataset: https://www.kaggle.com/datasets/arifmia/sleep-health-and-digital-screen-exposure-dataset/data
+
+
+
+## Data Wrangling
+First and foremost, let's load in and take a look at the format of the data.
+```{r load}
+sleepDF <- read_csv("SleepData.csv",show_col_types = FALSE)
+head(sleepDF, 5)
+
+```
+As shown, this dataset has 26 total columns, including 10 columns holding dbl values and 16 columns holding char values. 
+
+
+The purpose of this analysis is to inform the general population what factors increase/decrease sleep time and quality. As a result, we will remove all the entries of people with sleep disorders and medical issues since only about 15% of the general population struggles with a sleep disorder. This is especially important because over 50% of entries in this dataset are those with sleep disorders and this would skew our data and analysis. 
+```{r wrangling}
+df <- sleepDF %>% rename("SleepDisorder" ="Sleep disorder", "MedicalIssue" ="Medical issue")
+df<- df %>% filter(SleepDisorder != "Y")
+df<- df %>% filter(MedicalIssue != "Y")
+
+```
+
+Now we can clean up our dataset by getting rid of those 2 columns since every entry will hold the same value. We can also get rid of several other columns. Including but not limited to, many eye conditions since they will not be applicable for this analysis. We will also rename several columns that have spaces in their title to maintain consistency and avoid future difficulties.
+```{r wrangling2}
+df <- df %>% select(-c(12,14,18,19,23,24,25,26))
+df <- df %>% rename("SleepDuration" ="Sleep duration", "SleepQuality" ="Sleep quality",
+                         "StressLevel" ="Stress level", "BloodPressure" ="Blood pressure",
+                         "HeartRate" ="Heart rate","DailySteps" ="Daily steps", 
+                         "PhysicalActivity" ="Physical activity", 
+                         "WakeUpOverNight" ="Wake up during night",
+                         "CaffeineConsumption" ="Caffeine consumption", 
+                         "AlcoholConsumption" ="Alcohol consumption", 
+                         "SmartDeviceBeforeBed" ="Smart device before bed", 
+                         "AvgScreenTime" ="Average screen time", "BlueLight" ="Blue-light filter")
+head(df,5)
+```
+Categorical variables must also be changed to factors to insure R correctly interprets these categorical variables when applying algorithms.
+```{r wrangling3}
+df$Gender <- as.factor(df$Gender)
+df$WakeUpOverNight <- as.factor(df$WakeUpOverNight)
+df$CaffeineConsumption <- as.factor(df$CaffeineConsumption)
+df$AlcoholConsumption <- as.factor(df$AlcoholConsumption)
+df$Smoking <- as.factor(df$Smoking)
+df$SmartDeviceBeforeBed <- as.factor(df$SmartDeviceBeforeBed)
+df$BlueLight <- as.factor(df$BlueLight)
+
+```
+
+We now have a table that is much easier to read and handle.
+
+
+Finally, we will ensure data integrity by checking for NA values and duplicate entries.
+```{r wrangling4}
+colSums(is.na(df))
+dup <- df %>% filter(duplicated(df))
+if(nrow(dup)==0){
+  print("No duplicate entries.")
+}
+
+```
+After verifying that there are no NA values or duplicate entries, our data wrangling and cleaning is complete.
+
+## Exploratory Analysis
+
+First, we'll familiarize ourselvelves with the data further by visualizing the distribution of sleep duration and sleep quality.
+```{r visuals}
+ggplot(df, aes(x = SleepDuration)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black")  +
+  
+  labs(title = "Distribution of Sleep Duration", x= "Sleep Duration (hours)", y = "count")
+```
+From this histogram we can see that the distribution of sleep duration is somewhat even. There are a lower amount of people getting less than 4 hours and higher than 9 hours though. We can also see that there is a high number of people getting less than the recommended 7-9 hours of sleep. Making this a very relevant issue.
+
+```{r}
+ggplot(df, aes(x = SleepQuality)) +
+  geom_bar(fill = "skyblue", color = "black") +labs(title = "Distribution of Sleep Quality", x= "Sleep Quality", y = "Count")
+```
+The distribution of sleep quality seems to be even across all 5 levels. 
+
+### Linear Regression\
+We will now attempt to find relationships between sleep duration and the various factors through linear regression modeling.
+```{r linAnal}
+lmSleepDuration <- lm(SleepDuration ~ StressLevel + HeartRate + DailySteps 
+                        + PhysicalActivity + Height + Weight +  CaffeineConsumption + 
+                          AlcoholConsumption +  Smoking + SmartDeviceBeforeBed + BlueLight
+                        , data = df)
+
+summary(lmSleepDuration)
+```
+The result is a lot of information and can seem overwhelming but we will mainly be focusing on the p-values and coefficients. This is because p-values show the statistical significance of the factor and the coefficients show how much that factor affects sleep duration. 
+
+Looking at the p-values, almost all of them are higher than the 0.05 value that indicates statistical significance. In fact, the only one with a p-value lower than 0.05 is heart rate, suggesting this an important factor in sleep duration. 
+
+Let's take a look at the graph for sleep duration based on heart rate.
+```{r}
+ggplot(df, aes(x = HeartRate, y = SleepDuration)) +
+  geom_point(aes(color = Gender), alpha = 0.6) +
+  geom_smooth(method = "lm", color = "black") +
+  labs(title ="Sleep Duration vs Heart Rate", x = "Heart Rate (bpm)", y = "Sleep Duration (hours)") 
+```
+With the amount of data we have, it is difficult to see any correlation between the points. However, we can see that heart rate has a slight negative effect on sleep duration from the regression line.
+
+The p-values of stress level, alcohol consumption, and use of a blue light filter are comparatively low but still not low enough to prompt that they are statistically significant.
+
+Looking at the coefficients, we can see that the coefficients of stress level, heart rate, caffeine consumption, alcohol consumption, smoking, using a smart device, and using a blue light filter are relatively higher than the other variables. This suggests that these factors make more of a difference in how long you sleep, although it is still a subtle difference as these values are still small.
+
+However, you can also see in the summary that our R-squared value is very low. This suggests that our linear regression model does not explain much of the variation in the length of one's sleep. So all the inferences made from this model should be taken with a grain of salt.
+
+Hopefully we'll have better results when analyzing sleep quality.
+
+```{r linAnal2}
+lmSleepQuality <- lm(SleepQuality ~ StressLevel+ HeartRate + DailySteps + PhysicalActivity + 
+                       Height + Weight + CaffeineConsumption + 
+                       AlcoholConsumption + Smoking + SmartDeviceBeforeBed + 
+                       BlueLight, data = df)
+
+summary(lmSleepQuality)
+```
+This time we see that there are no p-values under 0.05, indicating that none of these variables impact sleep quality.
+
+However, we see the same variables with higher coefficients as we did in the sleep duration model. So maybe we are onto something.
+
+Unfortunately, our R-squared value is once again very low. Maybe we need to try a different approach.
+
+### Random Forest\
+We will now try using the random forest approach as it is more capable of handling complex interactions and is less sensitive to overfitting than our linear regression model.
+```{r}
+rfSleepDuration <- randomForest(SleepDuration ~ Age + StressLevel + HeartRate + DailySteps + 
+                                  PhysicalActivity + Height + Weight +  CaffeineConsumption + 
+                                  AlcoholConsumption + Smoking + SmartDeviceBeforeBed + 
+                                  BlueLight, data = df, 
+                                  importance = TRUE)
+print(rfSleepDuration)
+importance(rfSleepDuration)
+varImpPlot(rfSleepDuration, main = "Variable Importance for Sleep Duration")
+```
+
+From the plot on the left, we can see that smoking, heart rate, alcohol consumption, and using a smart device before bed have the highest increase in mean squared error. This means that these variables are the more important factors in predicting sleep duration. Surprisingly, this plot also shows that physical activity and daily steps do not signigicantly impact sleep duration. Height also has a negative increase in mean squared error, but this is expected. 
+
+The mean of squared residuals is 3.087349. This suggests that the model has a high level of error when trying to predict sleep duration. 
+
+The percent variance has a value of -2.5. This indicates that this random forest model has not captured many meaningful patterns in the data.
+
+
+## Conclusion
+
+All in all, there are many different factors that impact sleep duration and sleep quality. As a result, these values are difficult to predict using simple machine learning algorithms. But we did find similarities between our two models. Stress level, heart rate, alcohol consumption, smoking, using a smart device before bed, and using a blue light filter had relatively higher coefficients in the linear regression model along with a higher increase in mean squared error in the random forest model. This suggests that these variables are the most impactful for sleep duration and quality. However, both of our models had poor performance overall. In the end, we did find some significant factors but the models could certainly use improvement. This can be done by removing unimportant factors or trying a different algorithm in future endeavors.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
