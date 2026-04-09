@@ -111,7 +111,7 @@ I'm a data analyst with hands-on experience in statistical modeling, machine lea
 ## Education
 
 **Arizona State University**
-*Bachelor's Degree* | Data Analytics
+*Bachelor of Science* | Data Science
 
 ---
 
